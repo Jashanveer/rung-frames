@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rung Frames</title>
+  <link rel="icon" href="data:,">
+  <!-- Once Rung is live on the App Store, enable the Smart App Banner:
+       <meta name="apple-itunes-app" content="app-id=YOUR_APP_ID"> -->
+  <style>
+    :root {
+      --accent: oklch(31% 0.018 248);
+      --accent-ink: oklch(99% 0.006 240);
+      --success: oklch(52% 0.092 148);
+      --poster-scale: 1;
+      --poster-w: 1180px;
+      --poster-h: 800px;
+      --poster-display: "New York", "Iowan Old Style", "Palatino Linotype", Georgia, ui-serif, serif;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: 0;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --canvas: oklch(15% 0.008 248);
+      --canvas-hi: oklch(18.5% 0.012 248);
+      --canvas-lo: oklch(11.5% 0.008 248);
+      --ink: oklch(96% 0.012 240);
+      --muted: color-mix(in oklch, var(--ink) 62%, transparent);
+      --faint: color-mix(in oklch, var(--ink) 50%, transparent);
+      --accent: oklch(93% 0.01 248);
+      --accent-ink: oklch(20% 0.015 248);
+      --success-text: oklch(70% 0.12 148);
+      --graph-line: oklch(68% 0.13 148);
+      --lv1: oklch(34% 0.06 148);
+      --lv2: oklch(44% 0.09 148);
+      --lv3: oklch(54% 0.11 148);
+      --lv4: oklch(68% 0.135 148);
+      --on-lv4: oklch(18% 0.01 248);
+      --glass-base: oklch(20% 0.01 248);
+      --glass-border: color-mix(in oklch, var(--ink) 16%, transparent);
+      --glass-hi: color-mix(in oklch, var(--ink) 34%, transparent);
+      --glass-solid: oklch(20% 0.018 248);
+      --poster-paper: oklch(22% 0.018 248);
+      --mat: oklch(26% 0.012 248);
+      --panel: oklch(23% 0.01 248);
+      --panel-soft: oklch(21% 0.01 248);
+      --panel-stroke: color-mix(in oklch, var(--ink) 11%, transparent);
+      --tile-border: color-mix(in oklch, var(--ink) 10%, transparent);
+      --cell-empty: color-mix(in oklch, var(--ink) 8%, transparent);
+      --control: color-mix(in oklch, oklch(33% 0.018 248) 48%, transparent);
+      --control-strong: color-mix(in oklch, oklch(38% 0.018 248) 58%, transparent);
+      --glow-a: oklch(26% 0.05 148 / .5);
+      --glow-b: oklch(24% 0.04 292 / .4);
+      --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 18px 44px rgb(5 12 19 / .35), 0 52px 120px rgb(5 12 19 / .45);
+      --inner-shadow: inset 0 1px 0 color-mix(in oklch, var(--ink) 14%, transparent);
+    }
+    html[data-theme="light"] {
+      color-scheme: light;
+      --canvas: oklch(96.5% 0.007 240);
+      --canvas-hi: oklch(99% 0.004 240);
+      --canvas-lo: oklch(93.5% 0.01 240);
+      --ink: oklch(19% 0.013 248);
+      --muted: color-mix(in oklch, var(--ink) 62%, transparent);
+      --faint: color-mix(in oklch, var(--ink) 55%, transparent);
+      --success-text: oklch(52% 0.092 148);
+      --graph-line: oklch(50% 0.115 148);
+      --lv1: oklch(90% 0.085 148);
+      --lv2: oklch(80% 0.105 148);
+      --lv3: oklch(67% 0.115 148);
+      --lv4: oklch(52% 0.12 148);
+      --on-lv4: oklch(99% 0.006 240);
+      --glass-base: oklch(99% 0.003 240);
+      --glass-border: color-mix(in oklch, var(--ink) 10%, transparent);
+      --glass-hi: color-mix(in oklch, oklch(100% 0 0) 94%, transparent);
+      --glass-solid: oklch(99% 0.006 240);
+      --poster-paper: oklch(99.2% 0.003 240);
+      --mat: oklch(99.7% 0.002 240);
+      --panel: oklch(99.4% 0.002 240);
+      --panel-soft: oklch(98.7% 0.003 240);
+      --panel-stroke: color-mix(in oklch, var(--ink) 9%, transparent);
+      --tile-border: color-mix(in oklch, var(--ink) 8%, transparent);
+      --cell-empty: color-mix(in oklch, var(--ink) 6%, transparent);
+      --control: color-mix(in oklch, oklch(100% 0 0) 44%, transparent);
+      --control-strong: color-mix(in oklch, oklch(100% 0 0) 68%, transparent);
+      --glow-a: oklch(92% 0.05 148 / .5);
+      --glow-b: oklch(92% 0.04 248 / .45);
+      --shadow: 0 1px 2px rgb(42 58 78 / .07), 0 12px 28px rgb(42 58 78 / .07), 0 44px 96px rgb(42 58 78 / .12);
+      --inner-shadow: inset 0 1px 0 color-mix(in oklch, oklch(100% 0 0) 68%, transparent);
+    }
+    * { box-sizing:border-box; letter-spacing:0; } [hidden]{ display:none !important; }
+    html,body { height:100%; }
+    body { margin:0; background:var(--canvas); color:var(--ink); overflow:hidden; -webkit-font-smoothing:antialiased; }
+    /* Gallery light: soft top-lit vignette behind everything. */
+    body::before {
+      content:""; position:fixed; inset:0; z-index:-2;
+      background: radial-gradient(120% 90% at 50% -10%, var(--canvas-hi), var(--canvas) 55%, var(--canvas-lo) 100%);
+    }
+    /* Ambient brand glows for the glass chrome to sample. */
+    body::after {
+      content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(560px 420px at 16% 6%, var(--glow-a), transparent 70%),
+        radial-gradient(640px 480px at 86% 94%, var(--glow-b), transparent 70%);
+    }
+
+    :where(.pill, .seg button, .size, .month):focus-visible {
+      outline:2px solid color-mix(in oklch, var(--accent) 65%, transparent); outline-offset:2px;
+    }
+
+    .stage { position:fixed; inset:0; display:grid; place-items:center; overflow:hidden; padding:96px 70px 64px; }
+    /* Printable poster, designed at a fixed size and scaled to fit the viewport. */
+    .poster {
+      position:relative; isolation:isolate; overflow:hidden;
+      width:1180px; height:800px; transform:scale(var(--poster-scale)); transform-origin:center; flex:0 0 auto;
+      border-radius:24px; padding:46px 58px 38px;
+      display:grid; grid-template-rows:1fr; gap:0;
+      background:var(--poster-paper);
+      border:1px solid var(--glass-border);
+    }
+    /* Mat + frame: screen-only staging rings that vanish in print. */
+    @media screen {
+      .poster {
+        box-shadow:
+          var(--inner-shadow),
+          0 0 0 16px var(--mat),
+          0 0 0 17.5px color-mix(in oklch, var(--ink) 22%, transparent),
+          var(--shadow);
+      }
+    }
+
+    .p-body { display:grid; grid-template-rows:minmax(0,1fr) 104px; grid-template-columns:1fr; gap:14px; min-height:0; }
+
+    /* Left: calendar surface (plain poster whitespace, no inset panel) */
+    .grid-frame {
+      position:relative; border:0; border-radius:0; padding:6px 0 0; display:flex; align-self:stretch; overflow:hidden;
+      background:transparent;
+    }
+    .heatmap-shell {
+      position:relative; z-index:1; width:100%; min-height:0;
+      display:grid; grid-template-rows:auto 1fr; gap:16px;
+    }
+    .heatmap-caption {
+      display:grid; grid-template-columns:1fr auto 1fr; align-items:end; gap:18px; padding:0 2px 4px;
+      color:var(--muted);
+    }
+    .heatmap-caption .eyebrow { display:grid; gap:6px; justify-items:start; }
+    .heatmap-caption .eyebrow .period {
+      color:var(--ink); font-family:var(--poster-display); font-size:36px; line-height:.92; font-weight:640;
+    }
+    .heatmap-caption .eyebrow .mode-label { font-size:11px; line-height:1; font-weight:760; text-transform:uppercase; }
+    .poster-brand { display:grid; gap:7px; justify-items:center; color:var(--ink); }
+    .poster-brand .brand-word { font-family:var(--poster-display); font-size:46px; line-height:.88; font-weight:680; }
+    .poster-brand .brand-line { font-size:11px; line-height:1; font-weight:640; color:var(--muted); }
+    .heatmap-caption .meta { display:grid; gap:5px; justify-items:end; }
+    .heatmap-caption .meta .meta-num {
+      color:var(--ink); font-family:var(--poster-display); font-size:34px; line-height:.92; font-weight:640;
+      font-variant-numeric:tabular-nums;
+    }
+    .heatmap-caption .meta .meta-label { font-size:11px; line-height:1; font-weight:760; text-transform:uppercase; color:var(--muted); }
+    .heatmap-caption .meta .meta-sub { font-size:10px; line-height:1; font-weight:640; color:var(--muted); }
+
+    /* Year: 12 months, 6 x 2. */
+    .months { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:54px 18px; width:100%; align-content:center; }
+    .month {
+      position:relative; min-width:0; width:100%; text-align:left; appearance:none; border:1px solid transparent; border-radius:14px; padding:9px 9px 10px; cursor:pointer; color:var(--ink);
+      background:transparent;
+      transition:background .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+      display:flex; flex-direction:column;
+    }
+    .month:hover{ background:var(--panel-soft); border-color:var(--tile-border); transform:translateY(-1px); }
+    .month:active{ transform:translateY(0) scale(.985); }
+    .month.current{ border-color:color-mix(in oklch, var(--success) 38%, var(--tile-border)); }
+    .month.current .mn{ color:var(--success-text); }
+    .month.unavailable{ cursor:not-allowed; }
+    .month.unavailable .g7 .cell{ opacity:.45; }
+    .month.unavailable .mn{ color:var(--muted); }
+    .month.unavailable:hover{ background:transparent; transform:none; }
+    .month.unavailable:not(.current):hover{ border-color:transparent; }
+    .month .mn{ font-size:13px; font-weight:760; margin-bottom:9px; line-height:1; font-family:"SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+    .g7{ display:grid; grid-template-columns:repeat(7,16px); gap:4px; align-content:start; justify-content:start; }
+    .g7 .wd{ font-size:8px; line-height:1; font-weight:680; color:var(--faint); text-align:center; width:16px; }
+    .months .g7 .wd{ display:none; } /* one legend would do; twelve are noise at print size */
+    .cell{ width:16px; height:16px; border-radius:999px; background:var(--cell-empty); transition:background-color .3s var(--ease); }
+    .cell.today{ box-shadow:0 0 0 1.5px color-mix(in oklch, var(--success) 62%, transparent); }
+    .mode-activity .cell.lv1{background:var(--lv1)} .mode-activity .cell.lv2{background:var(--lv2)}
+    .mode-activity .cell.lv3{background:var(--lv3)} .mode-activity .cell.lv4{background:var(--lv4)}
+    .mode-perfect .cell.pf{ background:var(--success); }
+    /* Month: single big day grid. */
+    .month-grid{ width:100%; display:flex; flex-direction:column; min-height:0; }
+    .month-grid .g7{ gap:12px; grid-template-columns:repeat(7,48px); justify-content:center; align-content:start; }
+    .month-grid .g7 .wd{ font-size:12px; width:48px; }
+    .month-grid .cell{ width:48px; height:48px; display:grid; place-items:center; font-size:13px; font-weight:650; color:var(--muted); transition:background-color .3s var(--ease), color .3s var(--ease); }
+    .month-grid .cell.pf{ color:oklch(99% 0.006 240); }
+    .month-grid .cell.lv3{ color:var(--ink); } .month-grid .cell.lv4{ color:var(--on-lv4); }
+    .month-grid .cell.blank{ background:transparent; box-shadow:none; }
+
+    /* Right: progress story */
+    .right{
+      min-height:0; align-self:stretch;
+      display:grid; grid-template-columns:320px 1fr; gap:44px;
+      border-top:1px solid var(--panel-stroke);
+      padding-top:14px;
+    }
+    .r-block{ min-height:0; display:flex; flex-direction:column; }
+    .r-title{ font-size:10px; font-weight:760; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+    .graph-area{ flex:1; min-height:0; display:grid; grid-template-rows:1fr auto; gap:5px; }
+    svg.graph{ width:100%; height:100%; overflow:visible; }
+    /* CSS variables do not resolve in SVG presentation attributes, set via CSS. */
+    svg.graph .line{ stroke:var(--graph-line); }
+    .graph-x{ display:flex; justify-content:space-between; font-size:9px; font-weight:680; color:var(--muted); }
+    .habits{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 28px; align-content:start; }
+    .habit{ min-height:26px; display:flex; align-items:baseline; gap:0; }
+    .habit .nm{ font-size:13px; font-weight:680; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .habit .lead{ flex:1; border-bottom:1px dotted var(--faint); margin:0 10px 3px; min-width:14px; }
+    .habit .pc{ font-size:13px; font-weight:760; color:var(--muted); font-variant-numeric:tabular-nums; font-family:"SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+
+    /* Website chrome, not part of the printed poster. */
+    .site-bar {
+      position:fixed; z-index:20; top:16px; left:50%; transform:translateX(-50%);
+      width:min(1140px, calc(100vw - 32px)); min-height:54px;
+      display:grid; grid-template-columns:1fr auto; align-items:center; gap:18px;
+      padding:7px 8px 7px 14px; border-radius:999px;
+      border:1px solid var(--glass-border); background:var(--control);
+      backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%);
+      box-shadow:inset 0 1px 0 var(--glass-hi), 0 16px 36px rgb(24 42 66 / .08);
+    }
+    .site-name { display:flex; align-items:center; gap:11px; min-width:0; color:var(--ink); }
+    .site-name strong { font-size:14px; font-weight:820; white-space:nowrap; }
+    #site-status { color:var(--muted); font-size:12px; font-weight:640; white-space:nowrap; }
+    .app-mark {
+      width:28px; height:28px; border-radius:8px; padding:5px;
+      display:grid; grid-template-columns:repeat(4,1fr); gap:2px; flex:0 0 auto;
+      background:var(--panel-soft);
+      border:1px solid var(--panel-stroke);
+      box-shadow: inset 0 1px 0 color-mix(in oklch, oklch(100% 0 0) 18%, transparent);
+    }
+    .app-mark span { border-radius:2px; background:color-mix(in oklch, var(--ink) 28%, transparent); opacity:.42; }
+    .app-mark span:nth-child(4),
+    .app-mark span:nth-child(7),
+    .app-mark span:nth-child(10),
+    .app-mark span:nth-child(13) { background:var(--success); opacity:.85; }
+    .app-mark span:nth-child(1),
+    .app-mark span:nth-child(16) { opacity:.46; }
+    .toolbar { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+    .tb-div { width:1px; height:20px; background:var(--glass-border); margin:0 4px; flex:0 0 auto; }
+    .pill { border:1px solid var(--glass-border); background:var(--control); color:var(--ink); border-radius:999px;
+      min-height:40px; font-size:13px; font-weight:760; padding:10px 15px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+      text-decoration:none;
+      backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%);
+      box-shadow:inset 0 1px 0 var(--glass-hi), 0 10px 24px rgb(24 42 66 / .08);
+      transition:background .18s var(--ease), transform .14s var(--ease), border-color .18s var(--ease), filter .18s var(--ease); }
+    .pill:hover{ background:var(--control-strong); border-color:color-mix(in oklch, var(--accent) 20%, var(--glass-border)); }
+    .pill:active{ transform:scale(.965); }
+    .pill.icon{ width:40px; height:40px; padding:0; justify-content:center; }
+    .pill.quiet{ background:transparent; border-color:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+    .pill.quiet:hover{ background:var(--control); border-color:var(--glass-border); }
+    .pill.primary{
+      background:var(--accent);
+      color:var(--accent-ink); border-color:color-mix(in oklch, var(--accent) 48%, transparent);
+      min-width:186px; justify-content:center;
+      box-shadow:inset 0 1px 0 color-mix(in oklch, oklch(100% 0 0) 28%, transparent), 0 16px 32px color-mix(in oklch, var(--accent) 26%, transparent);
+    }
+    .pill.primary:hover{ filter:brightness(1.04); background:var(--accent); }
+    .pill[aria-disabled="true"]{
+      cursor:not-allowed; box-shadow:none;
+      background:var(--control); color:var(--muted); border-color:var(--glass-border);
+    }
+    .pill.primary[aria-disabled="true"]{
+      background:color-mix(in oklch, var(--accent) 12%, var(--control)); color:var(--muted); filter:none;
+    }
+    .pill.print{ background:var(--glass-solid); }
+    #back{ transition:opacity .22s var(--ease), transform .22s var(--ease), visibility 0s linear .22s; }
+    #back[data-hidden="true"]{ visibility:hidden; opacity:0; transform:scale(.9); position:absolute; pointer-events:none; }
+    #back[data-hidden="false"]{ transition-delay:0s; }
+    .seg{ display:inline-flex; gap:3px; padding:4px; border-radius:999px; background:var(--control); border:1px solid var(--glass-border); backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%); box-shadow:inset 0 1px 0 var(--glass-hi), 0 10px 24px rgb(24 42 66 / .08); }
+    .seg button{ min-height:32px; border:0; cursor:pointer; padding:7px 13px; border-radius:999px; background:transparent; color:var(--muted); font-size:12px; font-weight:760; transition:background .18s var(--ease), color .18s var(--ease); }
+    .seg button:hover:not([aria-pressed="true"]){ color:var(--ink); }
+    .seg button[aria-pressed="true"]{ background:var(--success); color:oklch(99% 0.006 240); box-shadow:0 6px 16px color-mix(in oklch, var(--success) 22%, transparent), inset 0 1px 0 color-mix(in oklch, oklch(100% 0 0) 32%, transparent); }
+
+    /* order modal */
+    .scrim{ position:fixed; inset:0; z-index:40; background:rgb(8 12 17 / .42); display:grid; place-items:center; padding:16px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+    .sheet{ width:min(440px,100%); border-radius:26px; padding:24px; background:var(--glass-solid); border:1px solid var(--glass-border); box-shadow:0 28px 72px rgb(8 15 24 / .28), inset 0 1px 0 var(--glass-hi); }
+    .sheet h2{ margin:0 0 5px; font-size:21px; font-family:"SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+    .sheet p{ margin:0 0 18px; color:var(--muted); font-size:13px; line-height:1.45; }
+    .sizes{ display:grid; gap:10px; margin-bottom:16px; }
+    .size{ display:flex; align-items:center; justify-content:space-between; border:1px solid var(--glass-border); border-radius:18px; padding:14px 15px; cursor:pointer; background:var(--control); color:var(--ink);
+      transition:border-color .18s var(--ease), background .18s var(--ease), transform .14s var(--ease); }
+    .size:hover{ border-color:color-mix(in oklch, var(--accent) 28%, var(--glass-border)); }
+    .size:active{ transform:scale(.985); }
+    .size[aria-pressed="true"]{ border-color:color-mix(in oklch, var(--accent) 52%, var(--glass-border)); background:color-mix(in oklch, var(--accent) 10%, var(--control)); box-shadow:inset 0 1px 0 var(--glass-hi); }
+    .size .n{ font-weight:780; } .size .d{ color:var(--muted); font-size:12px; } .size .p{ font-weight:850; font-variant-numeric:tabular-nums; font-family:"SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+    .mrow{ display:flex; gap:10px; } .mrow .pill.primary{ flex:1; justify-content:center; min-width:0; }
+    .signin-note{ position:fixed; bottom:20px; left:20px; z-index:20; max-width:360px; font-size:13px; line-height:1.45; color:var(--muted); }
+    .signin-note strong{ color:var(--ink); }
+    .signin-note:not(:empty){ padding:12px 14px; border-radius:16px; border:1px solid var(--glass-border); background:var(--control); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow:inset 0 1px 0 var(--glass-hi); }
+
+    @media (prefers-reduced-transparency: reduce){
+      .pill,.seg,.site-bar,.signin-note:not(:empty){ backdrop-filter:none; -webkit-backdrop-filter:none; background:var(--glass-solid); }
+    }
+
+    /* Motion: restrained, transform/opacity only, fully gated. */
+    @media (prefers-reduced-motion: no-preference){
+      .poster{ animation:poster-in .7s var(--ease) both; }
+      @keyframes poster-in{
+        from{ opacity:0; transform:scale(calc(var(--poster-scale) * .97)) translateY(12px); }
+        to{ opacity:1; transform:scale(var(--poster-scale)) translateY(0); }
+      }
+      .site-bar{ animation:bar-in .55s var(--ease) .08s both; }
+      @keyframes bar-in{ from{ opacity:0; transform:translate(-50%,-10px); } to{ opacity:1; transform:translate(-50%,0); } }
+      .scrim{ animation:scrim-in .22s ease-out both; }
+      @keyframes scrim-in{ from{ opacity:0; } }
+      .sheet{ animation:sheet-in .38s var(--ease) both; }
+      @keyframes sheet-in{ from{ opacity:0; transform:translateY(14px) scale(.97); } }
+      .scrim.closing{ animation:scrim-out .18s ease-in both; }
+      .scrim.closing .sheet{ animation:sheet-out .18s ease-in both; }
+      @keyframes scrim-out{ to{ opacity:0; } }
+      @keyframes sheet-out{ to{ opacity:0; transform:translateY(10px) scale(.97); } }
+      svg.graph .line{ stroke-dasharray:1; animation:draw .9s var(--ease) .1s both; }
+      @keyframes draw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
+      .is-loading .cell{ animation:cell-pulse 1.6s ease-in-out infinite; }
+      @keyframes cell-pulse{ 50%{ opacity:.45; } }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .is-loading .cell{ opacity:.7; }
+    }
+
+    @media (max-width: 760px){
+      html,body{ height:auto; min-height:100%; }
+      body{ overflow:auto; }
+      .site-bar{
+        top:12px; width:calc(100vw - 24px); border-radius:24px;
+        grid-template-columns:1fr; justify-items:center; padding:10px; gap:8px;
+      }
+      .site-name{ flex-wrap:wrap; justify-content:center; }
+      #site-status{ white-space:normal; text-align:center; }
+      .toolbar{ flex-wrap:wrap; justify-content:center; }
+      .tb-div{ display:none; }
+      .stage{
+        position:relative; inset:auto; display:block; overflow:visible;
+        place-items:normal; /* place-items now affects block containers in new Chromium */
+        padding:150px 22px 96px;
+        width:calc(var(--poster-w) + 44px);
+        height:max(100dvh, calc(var(--poster-h) + 246px));
+      }
+      .poster{ transform-origin:top left; }
+      .pill{ min-height:44px; }
+      .pill.primary{ min-width:0; }
+      .seg button{ min-height:36px; }
+      .signin-note{ bottom:12px; left:12px; right:12px; max-width:none; }
+    }
+
+    @media print {
+      /* Page box matches the poster exactly: pixel-identical, edge to edge. */
+      @page { size: 1180px 800px; margin: 0; }
+      html, body { width:100%; height:100%; overflow:hidden; background:oklch(99.2% 0.003 240); }
+      /* The print is always the light artifact, whatever the screen theme. */
+      html[data-theme="dark"] {
+        --canvas: oklch(96.5% 0.007 240);
+        --ink: oklch(19% 0.013 248);
+        --muted: color-mix(in oklch, var(--ink) 62%, transparent);
+        --faint: color-mix(in oklch, var(--ink) 55%, transparent);
+        --success-text: oklch(52% 0.092 148);
+        --graph-line: oklch(50% 0.115 148);
+        --lv1: oklch(90% 0.085 148);
+        --lv2: oklch(80% 0.105 148);
+        --lv3: oklch(67% 0.115 148);
+        --lv4: oklch(52% 0.12 148);
+        --on-lv4: oklch(99% 0.006 240);
+        --poster-paper: oklch(99.2% 0.003 240);
+        --panel-stroke: color-mix(in oklch, var(--ink) 9%, transparent);
+        --tile-border: color-mix(in oklch, var(--ink) 8%, transparent);
+        --cell-empty: color-mix(in oklch, var(--ink) 6%, transparent);
+        --panel: oklch(99.4% 0.002 240);
+        --panel-soft: oklch(98.7% 0.003 240);
+        --glass-border: color-mix(in oklch, var(--ink) 10%, transparent);
+      }
+      .site-bar, .signin-note, .scrim { display:none !important; }
+      body::before, body::after { display:none; }
+      .stage {
+        position:static; inset:auto; width:100vw; height:100vh; min-height:0;
+        display:grid; place-items:center; overflow:hidden; padding:0;
+      }
+      .poster {
+        width:1180px; height:800px; transform:none !important; transform-origin:center;
+        animation:none !important;
+        box-shadow:none; border:0; border-radius:0;
+        background:var(--poster-paper);
+      }
+      /* Survive "Background graphics: off": dots ARE the poster. */
+      .poster, .poster * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      /* Screen affordances never reach paper. */
+      .month{ opacity:1 !important; border-color:transparent !important; background:transparent !important; }
+      .month .g7 .cell{ opacity:1 !important; }
+      .cell.today{ box-shadow:none !important; }
+      svg.graph .line{ animation:none !important; stroke-dasharray:none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-bar">
+    <div class="site-name">
+      <span class="app-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+      <strong>Rung Frames</strong>
+      <span id="site-status">Print-ready habit posters</span>
+    </div>
+    <div class="toolbar">
+      <button class="pill" id="back" data-hidden="true">‹ Year</button>
+      <div class="seg" role="group" aria-label="Poster mode">
+        <button data-mode="activity" aria-pressed="false">Activity</button>
+        <button data-mode="perfect" aria-pressed="true">Perfect days</button>
+      </div>
+      <span class="tb-div" aria-hidden="true"></span>
+      <button class="pill print" id="print-btn" title="Print on your own printer, free">Print at home</button>
+      <button class="pill primary" id="order-btn">Print &amp; frame</button>
+      <span class="tb-div" aria-hidden="true"></span>
+      <a class="pill quiet" id="app-link" hidden target="_blank" rel="noopener">Get the app</a>
+      <button class="pill quiet" id="auth-btn">Sign in</button>
+      <button class="pill icon" id="theme-toggle" aria-label="Theme">
+        <svg id="theme-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></svg>
+      </button>
+    </div>
+  </header>
+  <div class="signin-note" id="signin-note"></div>
+
+  <div class="stage">
+    <section class="poster" id="poster">
+      <div class="p-body">
+        <!-- LEFT: year grid OR month grid -->
+        <div class="grid-frame mode-perfect" id="left"></div>
+        <!-- RIGHT: graph + top habits -->
+        <div class="right">
+          <div class="r-block">
+            <div class="r-title">Consistency</div>
+            <div class="graph-area">
+              <svg class="graph" id="graph" viewBox="0 0 320 72" preserveAspectRatio="none"></svg>
+              <div class="graph-x" id="graph-x"></div>
+            </div>
+          </div>
+          <div class="r-block">
+            <div class="r-title">Top habits</div>
+            <div class="habits" id="habits"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const CONFIG = {
+      backendUrl: 'https://rung-backend-dev.fly.dev',
+      appleClientId: 'jashanveer.Rung.web',
+      appleRedirectUri: location.origin + location.pathname,
+      testflightUrl: '',                                  // e.g. 'https://testflight.apple.com/join/XXXXXXXX' — shows the "Get the app" button
+    };
+    const QS = new URLSearchParams(location.search);
+    const YEAR = parseInt(QS.get('period') || QS.get('year') || String(new Date().getFullYear()), 10);
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const WD = ['M','T','W','T','F','S','S'];
+    const TOKEN_KEY = 'rung-frames-token';
+    const REDUCE = matchMedia('(prefers-reduced-motion: reduce)');
+    const key = (y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const mondayOffset = (date)=> (date.getDay() + 6) % 7;
+    const TODAY = new Date();
+    const CURRENT_YEAR = TODAY.getFullYear();
+    const CURRENT_MONTH_INDEX = TODAY.getMonth();
+    const todayKey = key(CURRENT_YEAR,CURRENT_MONTH_INDEX+1,TODAY.getDate());
+    const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    let snap=null, byDate={}, perHabit=null, token=null, preview=false;
+    let mode='perfect', view='year', openMi=null;
+
+    function isYearComplete(year){ return year < CURRENT_YEAR; }
+    function isCompletedMonth(mi){
+      if(YEAR < CURRENT_YEAR) return true;
+      if(YEAR > CURRENT_YEAR) return false;
+      return mi < CURRENT_MONTH_INDEX;
+    }
+    function canOrderCurrentView(){
+      return view==='year' ? isYearComplete(YEAR) : isCompletedMonth(openMi);
+    }
+    function unavailableTitle(){
+      if(view==='year' && YEAR === CURRENT_YEAR) return `The year poster can be framed from January 1, ${YEAR + 1}`;
+      if(view==='month' && YEAR === CURRENT_YEAR && openMi === CURRENT_MONTH_INDEX) return `${MONTHS[openMi]} can be framed from ${MONTHS[(openMi + 1) % 12]} 1`;
+      return 'Available when the period ends';
+    }
+
+    /* ---------- fit-to-viewport ---------- */
+    function fit(){
+      const compact=window.innerWidth<=760;
+      const bar=document.querySelector('.site-bar');
+      const stage=document.querySelector('.stage');
+      const availableW=Math.max(360, window.innerWidth - 180);
+      const availableH=Math.max(420, window.innerHeight - 220);
+      const s=compact
+        ? Math.max((window.innerWidth - 44)/1180, 0.46)
+        : Math.min(availableW/1180, availableH/800, 1.04);
+      document.documentElement.style.setProperty('--poster-scale', s.toFixed(4));
+      document.documentElement.style.setProperty('--poster-w', `${(1180*s).toFixed(1)}px`);
+      document.documentElement.style.setProperty('--poster-h', `${(800*s).toFixed(1)}px`);
+      stage.style.paddingTop = compact ? `${bar.offsetHeight + 52}px` : '';
+    }
+    window.addEventListener('resize', fit);
+    new ResizeObserver(()=>fit()).observe(document.querySelector('.site-bar'));
+
+    /* ---------- sample data ---------- */
+    function seededNoise(seed){
+      const x = Math.sin(seed * 12.9898) * 43758.5453;
+      return x - Math.floor(x);
+    }
+    function sampleSnapshot(year){
+      const heatmap=[];
+      for(let m=0;m<12;m++){ const dim=new Date(year,m+1,0).getDate();
+        for(let d=1;d<=dim;d++){
+          const date=new Date(year,m,d);
+          if(date > TODAY) continue;
+          const wave=0.67 + Math.sin((m / 11) * Math.PI * 2 - 0.7) * 0.10 + Math.sin(d / 6.8) * 0.08 + Math.cos((m * 4 + d) / 17) * 0.07;
+          const rhythm=(date.getDay()===0 || date.getDay()===6) ? -0.08 : 0.04;
+          const miss=(d % 17 === 0 || (m + d) % 29 === 0) ? -0.24 : 0;
+          const push=(d % 11 === 0 || m === 0 || m === 5) ? 0.12 : 0;
+          const noise=(seededNoise(year * 10000 + m * 100 + d) - 0.5) * 0.16;
+          const total=6, c=Math.max(0,Math.min(total,Math.round(total*(wave + rhythm + miss + push + noise))));
+          const perfect=c>=5 && d % 17 !== 0;
+          heatmap.push({dateKey:key(year,m+1,d), completedCount:c, totalCount:total, intensity:c/total, perfect}); } }
+      const habitStrengths=[
+        {habitId:1,title:'Morning run',strengthPercent:88,trend:'up'},
+        {habitId:2,title:'Workout',strengthPercent:74,trend:'up'},
+        {habitId:3,title:'Read 20 min',strengthPercent:61,trend:'flat'},
+        {habitId:4,title:'No phone after 10',strengthPercent:52,trend:'down'},
+      ];
+      return {year, heatmap, habitStrengths};
+    }
+
+    /* ---------- data ---------- */
+    function indexSnap(s){ snap=s; byDate={}; (s.heatmap||[]).forEach(h=>byDate[h.dateKey]=h); }
+    async function loadReal(tok){
+      const r=await fetch(`${CONFIG.backendUrl}/api/progress?year=${YEAR}`,{headers:{Authorization:'Bearer '+tok}});
+      if(r.status===401){ localStorage.removeItem(TOKEN_KEY); throw new Error('expired'); }
+      if(!r.ok) throw new Error('progress '+r.status); return r.json();
+    }
+    async function loadPerHabit(tok){   // background: per-habit heatmaps for month-scoped top habits
+      const habits=snap.habitStrengths||[]; if(!habits.length) return;
+      const out=await Promise.all(habits.map(async h=>{ try{
+        const r=await fetch(`${CONFIG.backendUrl}/api/progress?year=${YEAR}&habitId=${h.habitId}`,{headers:{Authorization:'Bearer '+tok}});
+        if(!r.ok) return null; const s=await r.json(); const map={}; (s.heatmap||[]).forEach(d=>map[d.dateKey]=d);
+        return {title:h.title, map}; }catch(e){ return null; } }));
+      perHabit=out.filter(Boolean);
+    }
+
+    /* ---------- cell coloring ---------- */
+    function lvFor(k){ const h=byDate[k]; if(!h) return 0; const r=h.intensity!=null?h.intensity:(h.completedCount/Math.max(1,h.totalCount));
+      if(r<=0)return 0; if(r<0.25)return 1; if(r<0.5)return 2; if(r<0.75)return 3; return 4; }
+    function isPerfect(k){ const h=byDate[k]; return !!(h&&h.perfect); }
+    function cellClass(k){ const c=['cell']; if(isPerfect(k))c.push('pf'); const lv=lvFor(k); if(lv)c.push('lv'+lv); if(k===todayKey)c.push('today'); return c.join(' '); }
+
+    /* ---------- smooth graph ---------- */
+    function smoothPath(pts){ if(pts.length<2) return pts.length?`M ${pts[0].x} ${pts[0].y}`:''; let d=`M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`; const t=0.2;
+      for(let i=0;i<pts.length-1;i++){ const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+        const c1x=p1.x+(p2.x-p0.x)*t,c1y=p1.y+(p2.y-p0.y)*t,c2x=p2.x-(p3.x-p1.x)*t,c2y=p2.y-(p3.y-p1.y)*t;
+        d+=` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`; } return d; }
+    function yearSeries(){ const weeks={};
+      Object.values(byDate).forEach(h=>{ const d=new Date(h.dateKey+'T00:00:00'); const oj=new Date(d.getFullYear(),0,1);
+        const wk=Math.floor(((d-oj)/86400000+oj.getDay())/7); (weeks[wk]=weeks[wk]||[]).push(h.intensity!=null?h.intensity:0); });
+      const raw=Object.keys(weeks).map(Number).sort((a,b)=>a-b).map(wk=>weeks[wk].reduce((a,b)=>a+b,0)/weeks[wk].length);
+      const pts=raw.map((v,i)=>{
+        const slice=raw.slice(Math.max(0,i-1), Math.min(raw.length,i+2));
+        return slice.reduce((a,b)=>a+b,0)/slice.length;
+      });
+      return {pts, labels:['Jan','Apr','Jul','Oct','Dec']}; }
+    function monthSeries(mi){ const y=YEAR,m=mi+1,dim=new Date(y,m,0).getDate(); const v=[];
+      for(let d=1;d<=dim;d++){ const h=byDate[key(y,m,d)]; v.push(h?(h.intensity!=null?h.intensity:0):0); }
+      return {pts:v, labels:['1','8','15','22', String(dim)]}; }
+    function renderGraph(){
+      const W=320,H=72,padL=2,padR=2,padT=6,padB=6;
+      const svg=document.getElementById('graph'); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+      const ser = view==='year' ? yearSeries() : monthSeries(openMi);
+      const vals = ser.pts; const n=vals.length;
+      let body='';
+      if(n>=2){
+        const pts=vals.map((vv,i)=>({x:padL+(W-padL-padR)*(i/(n-1)), y:(H-padB)-(H-padT-padB)*Math.max(0,Math.min(1,vv))}));
+        const line=smoothPath(pts);
+        body += `<path class="line" d="${line}" pathLength="1" fill="none" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>`;
+      }
+      svg.innerHTML=body;
+      document.getElementById('graph-x').innerHTML=ser.labels.map(l=>`<span>${l}</span>`).join('');
+    }
+
+    /* ---------- top habits ---------- */
+    function yearHabits(){ return (snap.habitStrengths||[]).slice().sort((a,b)=>b.strengthPercent-a.strengthPercent).slice(0,4)
+      .map(h=>({title:h.title, pct:h.strengthPercent})); }
+    function monthHabits(mi){
+      if(!perHabit) return yearHabits();
+      const y=YEAR,m=mi+1,dim=new Date(y,m,0).getDate();
+      const ranked=perHabit.map(h=>{ let done=0,active=0;
+        for(let d=1;d<=dim;d++){ const c=h.map[key(y,m,d)]; if(c){ active++; if(c.completedCount>0) done++; } }
+        return {title:h.title, pct:active?Math.round(done/active*100):0, active}; })
+        .filter(h=>h.active>0).sort((a,b)=>b.pct-a.pct).slice(0,4);
+      return ranked.length?ranked:yearHabits();
+    }
+    function renderHabits(){
+      const list = view==='year' ? yearHabits() : monthHabits(openMi);
+      const wrap=document.getElementById('habits');
+      const block=wrap.closest('.r-block');
+      if(!list.length){ block.style.visibility='hidden'; wrap.innerHTML=''; return; }
+      block.style.visibility='';
+      wrap.innerHTML=list.map(h=>`<div class="habit"><span class="nm">${esc(h.title)}</span><span class="lead"></span><span class="pc">${h.pct}%</span></div>`).join('');
+    }
+
+    /* ---------- left grid ---------- */
+    function heatmapStats(mi){
+      const entries=Object.values(byDate).filter(h=>{
+        if(mi==null) return true;
+        const d=new Date(h.dateKey+'T00:00:00');
+        return d.getFullYear()===YEAR && d.getMonth()===mi;
+      });
+      return {perfect:entries.filter(h=>h.perfect).length, total:entries.length};
+    }
+    function heatmapCaption(label, stats){
+      const period = view==='year' ? String(YEAR) : `${MONTHS[openMi]} ${YEAR}`;
+      return `<div class="heatmap-caption">`
+        + `<span class="eyebrow"><span class="period">${period}</span><span class="mode-label">${label}</span></span>`
+        + `<span class="poster-brand"><span class="brand-word">Rung</span><span class="brand-line">one rung at a time</span></span>`
+        + `<span class="meta"><span class="meta-num">${stats.perfect}</span><span class="meta-label">perfect days</span><span class="meta-sub">of ${stats.total} tracked</span></span>`
+        + `</div>`;
+    }
+    function miniMonth(mi){
+      const y=YEAR,m=mi+1,firstDow=mondayOffset(new Date(y,mi,1)),dim=new Date(y,m,0).getDate();
+      const now=new Date(),isCur=y===now.getFullYear()&&mi===now.getMonth(),isPast=y===now.getFullYear()&&mi<now.getMonth();
+      const available=isCompletedMonth(mi);
+      let g=`<div class="g7">`+WD.map(w=>`<div class="wd">${w}</div>`).join('');
+      for(let i=0;i<firstDow;i++) g+=`<div></div>`;
+      for(let d=1;d<=dim;d++){ const k=key(y,m,d); g+=`<div class="${cellClass(k)}"></div>`; }
+      g+=`</div>`;
+      const tip = available ? `View ${MONTHS[mi]}` : `Available ${MONTHS[(mi + 1) % 12]} 1`;
+      return `<button class="month${isCur?' current':''}${isPast?' past':''}${available?'':' unavailable'}" data-mi="${mi}" aria-disabled="${available?'false':'true'}" ${available?'':'disabled'} title="${tip}"><div class="mn">${MONTHS[mi].slice(0,3)}</div>${g}</button>`;
+    }
+    function renderLeft(){
+      const left=document.getElementById('left'); left.className='grid-frame mode-'+mode;
+      if(view==='year'){
+        left.innerHTML=`<div class="heatmap-shell">${heatmapCaption(mode==='perfect'?'Perfect days':'Activity', heatmapStats(null))}<div class="months">`+Array.from({length:12},(_,m)=>miniMonth(m)).join('')+`</div></div>`;
+        left.querySelectorAll('.month').forEach(b=>b.addEventListener('click',()=>openMonth(+b.dataset.mi)));
+      } else {
+        const y=YEAR,m=openMi+1,firstDow=mondayOffset(new Date(y,openMi,1)),dim=new Date(y,m,0).getDate();
+        let g=`<div class="g7">`+WD.map(w=>`<div class="wd">${w}</div>`).join('');
+        for(let i=0;i<firstDow;i++) g+=`<div class="cell blank"></div>`;
+        for(let d=1;d<=dim;d++){ const k=key(y,m,d); g+=`<div class="${cellClass(k)}"></div>`; }
+        g+=`</div>`;
+        left.innerHTML=`<div class="heatmap-shell">${heatmapCaption(mode==='perfect'?'Perfect days':'Activity', heatmapStats(openMi))}<div class="month-grid">${g}</div></div>`;
+      }
+    }
+
+    /* ---------- views ---------- */
+    function flashStatus(msg){
+      const s=document.getElementById('site-status');
+      s.textContent=msg;
+      if(!REDUCE.matches) s.animate([{opacity:0},{opacity:1}],{duration:240,easing:'ease-out'});
+    }
+    function renderAll(){
+      document.getElementById('back').dataset.hidden = String(view==='year');
+      const orderBtn=document.getElementById('order-btn');
+      const status=document.getElementById('site-status');
+      const canOrder=canOrderCurrentView();
+      orderBtn.setAttribute('aria-disabled', String(!canOrder));
+      orderBtn.title = canOrder ? 'We print it, frame it, and ship it' : unavailableTitle();
+      orderBtn.textContent = canOrder
+        ? (view==='year' ? `Print & frame from $${SIZES[0].p.year}` : `Frame ${MONTHS[openMi]} from $${SIZES[0].p.month}`)
+        : 'Print & frame';
+      status.textContent = canOrder
+        ? (view==='year' ? 'Full-year poster ready' : `${MONTHS[openMi]} poster ready`)
+        : (view==='year' && YEAR === CURRENT_YEAR ? 'Pick a finished month to frame' : 'Available when the period ends');
+      renderLeft(); renderGraph(); renderHabits();
+    }
+    function swapView(){
+      renderAll();
+      if(REDUCE.matches) return;
+      document.getElementById('left').animate(
+        [{opacity:0, transform:'translateY(8px)'},{opacity:1, transform:'translateY(0)'}],
+        {duration:320, easing:'cubic-bezier(.16,1,.3,1)'}
+      );
+    }
+    function openMonth(mi){ view='month'; openMi=mi; swapView(); }
+    function backToYear(){ view='year'; openMi=null; swapView(); }
+    document.getElementById('back').addEventListener('click', backToYear);
+    document.getElementById('print-btn').addEventListener('click',()=>window.print());
+
+    function setMode(next){
+      mode=next;
+      document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+      const left=document.getElementById('left');
+      left.className='grid-frame mode-'+mode;             // class swap only: cells crossfade in place
+      const lbl=left.querySelector('.mode-label');
+      if(lbl) lbl.textContent = mode==='perfect' ? 'Perfect days' : 'Activity';
+    }
+    document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+
+    /* ---------- order ---------- */
+    const SIZES=[
+      {id:'a3',n:'A3',d:'30 × 42 cm (11.7 × 16.5 in)',p:{year:39,month:24}},
+      {id:'a2',n:'A2',d:'42 × 59 cm (16.5 × 23.4 in)',p:{year:59,month:36}}
+    ];
+    let chosen='a3';
+    document.getElementById('order-btn').addEventListener('click',()=>{
+      if(!canOrderCurrentView()){ flashStatus(unavailableTitle()); return; }
+      const kind=view==='year'?'year':'month';
+      const period=view==='year'?YEAR:`${YEAR}-${String(openMi+1).padStart(2,'0')}`;
+      const label=view==='year'?String(YEAR):`${MONTHS[openMi]} ${YEAR}`;
+      const scrim=document.createElement('div'); scrim.className='scrim';
+      const price=()=>SIZES.find(s=>s.id===chosen).p[kind];
+      scrim.innerHTML=`<div class="sheet" role="dialog" aria-modal="true"><h2>Print & frame ${label}</h2>
+        <p>We print your ${kind==='year'?'full-year':MONTHS[openMi]} ${mode==='perfect'?'perfect-days':'activity'} poster on museum-grade matte paper, frame it, and ship it ready to hang.</p>
+        <div class="sizes">${SIZES.map(s=>`<button class="size" data-size="${s.id}" aria-pressed="${s.id===chosen}"><span><span class="n">${s.n}</span> &nbsp;<span class="d">${s.d}</span></span><span class="p">$${s.p[kind]}</span></button>`).join('')}</div>
+        <div class="mrow"><button class="pill" data-close>Cancel</button><button class="pill primary" data-go>Continue · $<span id="op">${price()}</span></button></div></div>`;
+      document.body.appendChild(scrim);
+      const orderBtnEl=document.getElementById('order-btn');
+      const closeNow=()=>{ scrim.remove(); document.removeEventListener('keydown', onKey); orderBtnEl.focus(); };
+      const close=()=>{
+        if(REDUCE.matches){ closeNow(); return; }
+        scrim.classList.add('closing');
+        scrim.addEventListener('animationend', closeNow, {once:true});
+      };
+      const onKey=e=>{ if(e.key==='Escape') close(); };
+      document.addEventListener('keydown', onKey);
+      scrim.addEventListener('click',e=>{if(e.target===scrim)close();});
+      scrim.querySelector('[data-close]').addEventListener('click',close);
+      scrim.querySelectorAll('.size').forEach(b=>b.addEventListener('click',()=>{chosen=b.dataset.size;
+        scrim.querySelectorAll('.size').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.size===chosen)));
+        scrim.querySelector('#op').textContent=price();}));
+      scrim.querySelector('[data-go]').addEventListener('click',()=>{
+        const p=new URLSearchParams({kind,period:String(period),size:chosen,mode,requestId:QS.get('requestId')||''});
+        location.href='./checkout/?'+p.toString();});
+      scrim.querySelector('.size[aria-pressed="true"]').focus();
+    });
+
+    /* ---------- auth ---------- */
+    function loadAppleSdk(){ return new Promise((res,rej)=>{ if(window.AppleID) return res();
+      const s=document.createElement('script'); s.src='https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+      s.onload=res; s.onerror=()=>rej(new Error('apple sdk')); document.head.appendChild(s); }); }
+    async function signInWithApple(){
+      const note=document.getElementById('signin-note');
+      if(!CONFIG.appleClientId){
+        note.textContent="Sign-in isn't available yet, so you're looking at a sample poster.";
+        console.warn('Apple sign-in needs CONFIG.appleClientId set to a Services ID with this page registered as a Return URL.');
+        return;
+      }
+      try{
+        await loadAppleSdk();
+        AppleID.auth.init({clientId:CONFIG.appleClientId, scope:'name email', redirectURI:CONFIG.appleRedirectUri, usePopup:true});
+        const r=await AppleID.auth.signIn();
+        const name=r.user&&r.user.name?[r.user.name.firstName,r.user.name.lastName].filter(Boolean).join(' '):null;
+        const res=await fetch(`${CONFIG.backendUrl}/api/auth/apple`,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({identityToken:r.authorization.id_token, authorizationCode:r.authorization.code||undefined, displayName:name||undefined})});
+        if(!res.ok){
+          note.textContent="Couldn't sign in. Please try again in a moment.";
+          console.error('auth/apple '+res.status+': add the Services ID to backend APP_APPLE_BUNDLE_IDS and this origin to CORS_ALLOWED_ORIGINS.');
+          return;
+        }
+        const auth=await res.json(); localStorage.setItem(TOKEN_KEY, auth.accessToken); location.reload();
+      }catch(e){
+        if(e&&e.error==='popup_closed_by_user') return;
+        note.textContent="Couldn't sign in. Please try again.";
+        console.error(e);
+      }
+    }
+    document.getElementById('auth-btn').addEventListener('click',()=>{ if(token){ localStorage.removeItem(TOKEN_KEY); location.reload(); } else signInWithApple(); });
+
+    /* ---------- theme ---------- */
+    const SUN='<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/>';
+    const MOON='<path d="M20 14.5A8 8 0 1 1 9.5 4a6.3 6.3 0 0 0 10.5 10.5z" fill="currentColor" stroke="none"/>';
+    function applyTheme(t){
+      document.documentElement.setAttribute('data-theme',t);
+      document.getElementById('theme-icon').innerHTML=t==='dark'?MOON:SUN;
+      document.getElementById('theme-toggle').setAttribute('aria-label', t==='dark'?'Switch to light mode':'Switch to dark mode');
+      try{localStorage.setItem('rung-frames-theme',t);}catch(e){}
+    }
+    (function(){ let t=QS.get('theme'); if(t!=='light'&&t!=='dark'){ try{t=localStorage.getItem('rung-frames-theme');}catch(e){} } if(!t)t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'; applyTheme(t); })();
+    document.getElementById('theme-toggle').addEventListener('click',()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+    /* The printed artifact is always light, whatever the screen theme. */
+    let prePrintTheme=null;
+    window.addEventListener('beforeprint',()=>{ prePrintTheme=document.documentElement.getAttribute('data-theme');
+      if(prePrintTheme!=='light') document.documentElement.setAttribute('data-theme','light'); });
+    window.addEventListener('afterprint',()=>{ if(prePrintTheme&&prePrintTheme!=='light') document.documentElement.setAttribute('data-theme',prePrintTheme); prePrintTheme=null; });
+
+    /* ---------- boot ---------- */
+    (async function boot(){
+      fit();
+      if(CONFIG.testflightUrl){ const a=document.getElementById('app-link'); a.href=CONFIG.testflightUrl; a.hidden=false; }
+      token=localStorage.getItem(TOKEN_KEY);
+      const note=document.getElementById('signin-note');
+      if(token){
+        indexSnap({year:YEAR, heatmap:[], habitStrengths:[]});
+        document.getElementById('poster').classList.add('is-loading');
+        renderAll();
+        flashStatus('Loading your year');
+        try{
+          indexSnap(await loadReal(token));
+          document.getElementById('poster').classList.remove('is-loading');
+          document.getElementById('auth-btn').textContent='Sign out';
+          renderAll();
+          loadPerHabit(token).then(()=>{ if(view==='month') renderHabits(); });
+          return;
+        }
+        catch(e){
+          token=null;
+          document.getElementById('poster').classList.remove('is-loading');
+          note.textContent='Could not load your data, so this is a sample poster. Sign in again to see your real year.';
+        }
+      }
+      preview=true; indexSnap(sampleSnapshot(YEAR)); renderAll();
+      if(!note.textContent){
+        note.innerHTML='<strong>Sample year.</strong> Sign in with your Rung account to print your own.';
+      }
+    })();
+  </script>
+</body>
+</html>
